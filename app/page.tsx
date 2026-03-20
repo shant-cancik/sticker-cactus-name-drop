@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Header from '@/components/Header';
 import StickerUpload from '@/components/StickerUpload';
 import StickerCard from '@/components/StickerCard';
@@ -29,6 +29,9 @@ export default function HomePage() {
   const [batchMode, setBatchMode] = useState(false);
   const [batchOriginal, setBatchOriginal] = useState('');
   const [batchReplacement, setBatchReplacement] = useState('');
+
+  // Track which jobs have been auto-analyzed to avoid re-triggering
+  const analyzedIdsRef = useRef<Set<string>>(new Set());
 
   // Update a specific job
   const updateJob = useCallback((id: string, updates: Partial<StickerJob>) => {
@@ -104,6 +107,16 @@ export default function HomePage() {
     },
     [jobs, updateJob]
   );
+
+  // Auto-analyze newly uploaded stickers
+  useEffect(() => {
+    jobs.forEach((job) => {
+      if (job.status === 'uploaded' && !analyzedIdsRef.current.has(job.id)) {
+        analyzedIdsRef.current.add(job.id);
+        analyzeSticker(job.id);
+      }
+    });
+  }, [jobs, analyzeSticker]);
 
   // Step 2: Replace text using Gemini
   const replaceText = useCallback(
