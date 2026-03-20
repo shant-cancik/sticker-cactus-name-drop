@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-3-pro-image-preview',
       generationConfig: {
         // @ts-expect-error - responseModalities is valid for image generation
         responseModalities: ['TEXT', 'IMAGE'],
